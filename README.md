@@ -5,9 +5,9 @@
 - Docker
 - Docker Compose
 ### Windows
-- Docker Desktop (comes with Docker/Docker Compose)
+- Docker Desktop (comes with Docker/Docker Compose)  
 Download from www.docker.com/products/docker-desktop/
-- WSL2
+- WSL2  
 To install WSL2:
 1. Open PowerShell
 2. Run: 
@@ -20,4 +20,3 @@ wsl --install
 ```bash
 docker compose up --build
 ```
-or Windows equivalent.
