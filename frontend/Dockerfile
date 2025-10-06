@@ -1,6 +1,6 @@
-FROM node:22
+FROM node:22-slim
 WORKDIR /frontend
-COPY package.json package-lock.json* ./
+COPY package*.json ./
 RUN npm install
 COPY . .
 EXPOSE 3000
