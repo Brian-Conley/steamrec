@@ -20,4 +20,3 @@ wsl --install
 ```bash
 docker compose up --build
 ```
-or Windows equivalent.
