@@ -19,3 +19,10 @@ class Db:
             game = cur.execute("SELECT * FROM Games WHERE name LIKE ?",
                                (f"%{name}%",))
             return game.fetchall()
+
+    def query_category_by_id(self, cid):
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            category = cur.execute("SELECT * FROM Categories WHERE id = ?",
+                                   (cid,))
+            return category.fetchall()
