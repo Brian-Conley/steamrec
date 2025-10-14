@@ -23,6 +23,13 @@ class Db:
     def query_category_by_id(self, cid):
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
-            category = cur.execute("SELECT * FROM Categories WHERE id = ?",
-                                   (cid,))
-            return category.fetchall()
+            cat = cur.execute("SELECT * FROM Categories WHERE id = ?",
+                              (cid,))
+            return cat.fetchall()
+
+    def query_category_by_name(self, name):
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            cat = cur.execute("SELECT * FROM Categories WHERE name LIKE ?",
+                              (f"%{name}%",))
+            return cat.fetchall()
