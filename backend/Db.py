@@ -48,3 +48,9 @@ class Db:
             cur = conn.cursor()
             count = cur.execute("SELECT COUNT(*) FROM games")
             return count.fetchone()[0]
+
+    def query_category_count(self):
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            count = cur.execute("SELECT COUNT(*) FROM categories")
+            return count.fetchone()[0]
