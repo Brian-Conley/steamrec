@@ -42,3 +42,9 @@ class Db:
             cat = cur.execute("SELECT * FROM categories WHERE name LIKE ?",
                               (f"%{name}%",))
             return cat.fetchall()
+
+    def query_game_count(self):
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            count = cur.execute("SELECT COUNT(*) FROM games")
+            return count.fetchone()[0]
