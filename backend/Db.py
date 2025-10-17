@@ -19,8 +19,8 @@ class Db:
             cur = conn.cursor()
             game = cur.execute(
                     "SELECT * FROM games WHERE appid = ?",
-                    (appid,))
-            return game.fetchone()
+                    (appid,)).fetchone()
+            return game if game else None
 
     def query_game_by_name(self, name):
         """
@@ -35,8 +35,8 @@ class Db:
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
             game = cur.execute("SELECT * FROM games WHERE name LIKE ?",
-                               (f"%{name}%",))
-            return game.fetchall()
+                               (f"%{name}%",)).fetchall()
+            return game if game else None
 
     def query_games_by_categories(self, cids, match_all=True):
         """
@@ -61,14 +61,14 @@ class Db:
                                     WHERE categoryid IN ({placeholders})
                                     GROUP BY appid
                                     HAVING COUNT(DISTINCT categoryid) = ?
-                                    """, tuple(cids) + (len(cids),))
+                                    """, tuple(cids) + (len(cids),)).fetchall()
             else:
                 games = cur.execute(f"""
                                     SELECT DISTINCT appid
                                     FROM game_categories
                                     WHERE categoryid IN ({placeholders})
-                                    """, tuple(cids))
-            return games.fetchall()
+                                    """, tuple(cids)).fetchall()
+            return games if games else None
 
     def query_categories_by_appid(self, appid):
         """
@@ -87,7 +87,7 @@ class Db:
                                      WHERE appid = ?
                                      """, (appid,))
             cids = categories.fetchall()
-            return [c[0] for c in cids]
+            return [c[0] for c in cids] if cids else None
 
     def query_category_by_id(self, cid):
         """
@@ -102,8 +102,8 @@ class Db:
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
             cat = cur.execute("SELECT name FROM categories WHERE id = ?",
-                              (cid,))
-            return cat.fetchone()[0]
+                              (cid,)).fetchone()
+            return cat[0] if cat else None
 
     def query_category_by_name(self, name):
         """
@@ -120,8 +120,8 @@ class Db:
             cat = cur.execute("""
                               SELECT id FROM categories
                               WHERE name LIKE ?
-                              """, (f"%{name}%",))
-            return cat.fetchone()[0]
+                              """, (f"%{name}%",)).fetchone()
+            return cat[0] if cat else None
 
     def query_game_count(self):
         # Total number of games
