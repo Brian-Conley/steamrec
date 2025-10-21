@@ -16,7 +16,7 @@ wsl --install
 ```
 
 ## RUNNING THE PROJECT
-1. **Set up .env**
+1. **Set up .env**  
 In the project root directory, add the file .env and add the following entry:  
 ```bash
 STEAM_API_KEY=X
