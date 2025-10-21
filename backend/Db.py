@@ -136,3 +136,11 @@ class Db:
             cur = conn.cursor()
             count = cur.execute("SELECT COUNT(*) FROM categories")
             return count.fetchone()[0]
+
+    def get_game_table_column_names(self):
+        # List of the column names
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            cur.execute("PRAGMA table_info(games)")
+            attributes = [row[1] for row in cur.fetchall()]
+            return attributes

@@ -18,6 +18,7 @@ def hello():
 
 @app.route("/db/game")
 def db_game():
+    # Usage: http://localhost:5000/db/game?appid=X
     try:
         appid = int(request.args.get("appid"))
     except (ValueError, TypeError):
@@ -27,21 +28,7 @@ def db_game():
     if game is None:
         return jsonify({"error": "Appid not found"}), 404
 
-    keys = [
-        "appid",
-        "name",
-        "controller_support",
-        "has_achievements",
-        "supports_windows",
-        "supports_mac",
-        "supports_linux",
-        "price",
-        "total_recommendations",
-        "release_date",
-        "header_image"
-    ]
-
-    return jsonify(dict(zip(keys, game)))
+    return jsonify(dict(zip(db.get_game_table_column_names(), game)))
 
 
 if __name__ == "__main__":
