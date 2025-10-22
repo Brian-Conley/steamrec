@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 function App() {
   const [id, setId] = useState("");              // Store the input ID
-  const [name, setName] = useState("");          // New input for game name
   const [price, setPrice] = useState("");        // New input for game price
   const [data, setData] = useState(null);        // Store fetched JSON object
   const [error, setError] = useState(null);      // Store error message
@@ -31,10 +30,26 @@ function App() {
   };
 
   const insertGame = () => {
-    fetch(`http://localhost:5000/db/game`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ appid: id, name }),
+    fetch(`http://localhost:5000/db/insert?appid=${encodeURIComponent(id)}`, {
+      method: "POST"
+    })
+      .then((res) => res.json())
+      .then((json) => alert(json.status))
+      .catch((err) => alert("Error: " + err.message));
+  };
+
+  const updateGame = () => {
+    fetch(`http://localhost:5000/db/update?appid=${encodeURIComponent(id)}&price=${encodeURIComponent(price)}`, {
+      method: "PUT"
+    })
+      .then((res) => res.json())
+      .then((json) => alert(json.status))
+      .catch((err) => alert("Error: " + err.message));
+  };
+
+  const deleteGame = () => {
+    fetch(`http://localhost:5000/db/delete?appid=${encodeURIComponent(id)}`, {
+      method: "DELETE"
     })
       .then((res) => res.json())
       .then((json) => alert(json.status))
@@ -52,12 +67,6 @@ function App() {
         onChange={(e) => setId(e.target.value)}
       />
       <input
-        type="text"
-        placeholder="Enter Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <input
       type="number"
       placeholder="Enter Price"
       value={price}
@@ -67,7 +76,8 @@ function App() {
       <div style={{ marginTop: "1rem" }}>
         <button onClick={fetchByID}>Fetch</button>
         <button onClick={insertGame}>Insert</button>
-
+        <button onClick={updateGame}>Update</button>
+        <button onClick={deleteGame}>Delete</button>
       </div>
 
       <div style={{ marginTop: "1rem" }}>
