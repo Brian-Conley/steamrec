@@ -40,7 +40,9 @@ function App() {
 
   const updateGame = () => {
     fetch(`http://localhost:5000/db/update?appid=${encodeURIComponent(id)}&price=${encodeURIComponent(price)}`, {
-      method: "PUT"
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ appid: id, price: price })
     })
       .then((res) => res.json())
       .then((json) => alert(json.status))
