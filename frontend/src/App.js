@@ -7,14 +7,14 @@ function App() {
   const [loading, setLoading] = useState(false); // Loading state
 
   // Function to fetch data by ID
-  const fetchById = () => {
+  const fetchByID = () => {
     if (!id) return; // Don't fetch if no ID entered
 
     setLoading(true);
     setError(null);
     setData(null);
 
-    fetch(`http://localhost:5000/api/hello/${encodeURIComponent(id)}`)
+    fetch(`http://localhost:5000/db/game?appid=${encodeURIComponent(id)}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Error: ${res.status} ${res.statusText}`);
@@ -40,7 +40,7 @@ function App() {
         value={id}
         onChange={(e) => setId(e.target.value)}
       />
-      <button onClick={fetchById} disabled={!id || loading}>
+      <button onClick={fetchByID} disabled={!id || loading}>
         {loading ? "Loading..." : "Fetch"}
       </button>
 
