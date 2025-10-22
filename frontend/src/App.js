@@ -33,7 +33,7 @@ function App() {
 
   return (
     <div>
-      <h1>Search Thing by ID</h1>
+      <h3>Search Thing by ID</h3>
       <input
         type="text"
         placeholder="Enter ID"
