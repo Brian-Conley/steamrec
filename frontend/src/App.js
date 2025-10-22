@@ -34,8 +34,6 @@ function App() {
       method: "POST"
     })
       .then((res) => res.json())
-      .then((json) => alert(json.status))
-      .catch((err) => alert("Error: " + err.message));
   };
 
   const updateGame = () => {
@@ -45,8 +43,6 @@ function App() {
       body: JSON.stringify({ appid: id, price: price })
     })
       .then((res) => res.json())
-      .then((json) => alert(json.status))
-      .catch((err) => alert("Error: " + err.message));
   };
 
   const deleteGame = () => {
@@ -54,8 +50,6 @@ function App() {
       method: "DELETE"
     })
       .then((res) => res.json())
-      .then((json) => alert(json.status))
-      .catch((err) => alert("Error: " + err.message));
   };
 
   return (
