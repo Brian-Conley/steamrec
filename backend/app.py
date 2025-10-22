@@ -38,21 +38,27 @@ def db_update():
             return jsonify({"error": "Missing JSON body"}), 400
         
         appid = data.get("appid")
-        if appid is None:
-                return jsonify({"error": "Missing appid"}), 400
+        price = data.get("price")
+
+        if appid is None or price is None:
+                return jsonify({"error": "Missing 'appid' or 'price' in JSON"}), 400
+
+        # Type checks
+        try:
+            appid = int(appid)
+            price = int(price)
+        except (ValueError, TypeError):
+            return jsonify({"error": "'appid' and 'price' must be integers"}), 400
+
+        if price < 0:
+            return jsonify({"error": "'price' must be >= 0 (in cents)"}), 400
         
-        update_fields = {k: v for k, v in data.items() if k != "appid"}
-        if not update_fields:
-            return jsonify({"error": "No fields provided to update"}), 400
-        
-        # TODO: replace this print with the real call, e.g.
-        # result = db_update_game(appid, update_fields)
-        print(f"[DEBUG] Would UPDATE appid={appid} with data:\n{update_fields}")
+        db.change_game_price(appid, price)
 
         return jsonify({
-            "message": "Update successful (test)",
+            "message": "Price updated successfully",
             "appid": appid,
-            "updated_fields": update_fields
+            "new_price": price
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -61,23 +67,12 @@ def db_update():
 @app.route("/db/insert", methods=["POST"])
 def db_insert():
     try:
-        data = request.get_json(force=True)
-        if not data:
-            return jsonify({"error": "Missing json details"}), 400
+        appid = request.args.get("appid", type=int)
+        if appid is None:
+            return jsonify({"error": "Missing or invalid appid"}), 400
         
-        required_fields = [ 
-            "appid", "name", "price", "release_date",
-            "supports_linux", "supports_mac", "supports_windows"
-        ]
-        missing = [f for f in required_fields if f not in data]
-        if missing:
-            return jsonify({"error": f"Missing required fields: {missing}"}), 400
-        
-        # TODO: Replace with db call
-        # result = db.insert_game(data)
-        print(f"[DEBUG] Would INSERT new game into DB:\n{data}")
-
-        return jsonify({"message": "Insert successful (test)", "inserted": data}), 201
+        db.insert_game_by_appid(appid)
+        return jsonify({"message": "Insert successful", "appid": appid}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -89,9 +84,13 @@ def db_delete():
         if appid is None:
             return jsonify({"error": "Missing or invalid appid"}), 400
         
-        print(f"[DEBUG] Would DELETE game with appid={appid}")
-        # TODO: db.delete_game(appid)
-        return jsonify({"message": "Delete successful (test)", "appid": appid}), 200
+        db.delete_game_by_appid(appid)
+
+        return jsonify({
+            "message": "Delete successful",
+            "appid": appid
+        }), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
