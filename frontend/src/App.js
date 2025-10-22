@@ -3,6 +3,7 @@ import React, { useState } from "react";
 function App() {
   const [id, setId] = useState("");              // Store the input ID
   const [name, setName] = useState("");          // New input for game name
+  const [price, setPrice] = useState("");        // New input for game price
   const [data, setData] = useState(null);        // Store fetched JSON object
   const [error, setError] = useState(null);      // Store error message
   const [loading, setLoading] = useState(false); // Loading state
