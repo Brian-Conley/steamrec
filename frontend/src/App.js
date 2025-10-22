@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 function App() {
   const [id, setId] = useState("");              // Store the input ID
+  const [name, setName] = useState("");          // New input for game name
   const [data, setData] = useState(null);        // Store fetched JSON object
   const [error, setError] = useState(null);      // Store error message
   const [loading, setLoading] = useState(false); // Loading state
@@ -31,6 +32,17 @@ function App() {
       });
   };
 
+  const insertGame = () => {
+    fetch(`http://localhost:5000/db/game`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ appid: id, name }),
+    })
+      .then((res) => res.json())
+      .then((json) => alert(json.status))
+      .catch((err) => alert("Error: " + err.message));
+  };
+
   return (
     <div>
       <h3>Search Thing by ID</h3>
@@ -40,9 +52,17 @@ function App() {
         value={id}
         onChange={(e) => setId(e.target.value)}
       />
-      <button onClick={fetchByID} disabled={!id || loading}>
-        {loading ? "Loading..." : "Fetch"}
-      </button>
+      <input
+        type="text"
+        placeholder="Enter Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <div style={{ marginTop: "1rem" }}>
+        <button onClick={fetchByID}>Fetch</button>
+        <button onClick={insertGame}>Insert</button>
+      </div>
 
       <div style={{ marginTop: "1rem" }}>
         {error && <p style={{ color: "red" }}>Error: {error}</p>}
