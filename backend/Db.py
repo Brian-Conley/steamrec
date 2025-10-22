@@ -1,4 +1,5 @@
 import sqlite3
+import SteamStoreAPI as ssa
 
 
 class Db:
@@ -144,3 +145,79 @@ class Db:
             cur.execute("PRAGMA table_info(games)")
             attributes = [row[1] for row in cur.fetchall()]
             return attributes
+
+    def insert_game_by_appid(self, appid):
+        app = ssa.get_steam_app_details(appid)
+
+        if not app:
+            print("Invalid response")
+            return -1 # Invalid response
+
+        appdata = app.get(str(appid))
+        if not appdata or not appdata.get("success"):
+            return -2 # App does not exist
+
+        appdata = appdata.get("data")
+        if appdata.get("type") != "game":
+            return -3 # Not a game
+
+        info = {
+            "name": appdata.get("name"),
+            "controller_support": appdata.get("controller_support", None),
+            "has_achievements": True if appdata.get("achievements") else False,
+            "supports_windows": appdata.get("platforms", {}).get("windows", False),
+            "supports_mac": appdata.get("platforms", {}).get("mac", False),
+            "supports_linux": appdata.get("platforms", {}).get("linux", False),
+            "price": appdata.get("price_overview", {}).get("initial", 0),
+            "total_recommendations": appdata.get("recommendations", {}).get("total", 0),
+            "release_date": appdata.get("release_date", {}).get("date"),
+            "header_image": appdata.get("header_image"),
+        }
+
+        supp = info["controller_support"]
+        if supp == "none":
+            supp = 0
+        elif supp == "partial":
+            supp = 1
+        elif supp == "full":
+            supp = 2
+        else:
+            supp = 3
+
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            cur.execute("""
+                        INSERT OR REPLACE INTO games (
+                            appid, name, controller_support, has_achievements,
+                            supports_windows, supports_mac, supports_linux,
+                            price, total_recommendations, release_date,
+                            header_image
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                        appid,
+                        info["name"],
+                        supp,
+                        info["has_achievements"],
+                        info["supports_windows"],
+                        info["supports_mac"],
+                        info["supports_linux"],
+                        info["price"],
+                        info["total_recommendations"],
+                        info["release_date"],
+                        info["header_image"],
+                        ))
+            conn.commit()
+            return 0  # success
+
+    def delete_game_by_appid(self, appid):
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM games WHERE appid = ?", (appid,))
+            conn.commit()
+
+    def change_game_price(self, appid, price):
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            cur.execute("UPDATE games SET price = ? WHERE appid = ?",
+                        (price, appid,))
+            conn.commit()
