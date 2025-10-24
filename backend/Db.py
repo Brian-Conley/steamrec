@@ -1,6 +1,8 @@
 import sqlite3
 import SteamStoreAPI as ssa
 
+_filename = "steam_games.db"
+
 
 class Db:
     def __init__(self, filename):
@@ -221,3 +223,6 @@ class Db:
             cur.execute("UPDATE games SET price = ? WHERE appid = ?",
                         (price, appid,))
             conn.commit()
+
+
+instance = Db(_filename)

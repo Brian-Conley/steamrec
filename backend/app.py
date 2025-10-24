@@ -2,8 +2,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import Db
 
-db = Db.Db("steam_games.db")
-
 # Set up the server and allow requests from the frontend container
 app = Flask(__name__)
 CORS(app)
@@ -24,11 +22,12 @@ def db_game():
     except (ValueError, TypeError):
         return jsonify({"error": "Missing or invalid appid"}), 400
 
-    game = db.query_game_by_appid(appid)
+    game = Db.instance.query_game_by_appid(appid)
     if game is None:
         return jsonify({"error": "Appid not found"}), 404
 
-    return jsonify(dict(zip(db.get_game_table_column_names(), game)))
+    return jsonify(dict(zip(Db.instance.get_game_table_column_names(), game)))
+
 
 @app.route("/db/update", methods=["PUT"])
 def db_update():
@@ -36,7 +35,7 @@ def db_update():
         data = request.get_json(force=True)
         if not data:
             return jsonify({"error": "Missing JSON body"}), 400
-        
+
         appid = data.get("appid")
         price = data.get("price")
 
@@ -52,8 +51,8 @@ def db_update():
 
         if price < 0:
             return jsonify({"error": "'price' must be >= 0 (in cents)"}), 400
-        
-        db.change_game_price(appid, price)
+
+        Db.instance.change_game_price(appid, price)
 
         return jsonify({
             "message": "Price updated successfully",
@@ -70,8 +69,8 @@ def db_insert():
         appid = request.args.get("appid", type=int)
         if appid is None:
             return jsonify({"error": "Missing or invalid appid"}), 400
-        
-        db.insert_game_by_appid(appid)
+
+        Db.instance.insert_game_by_appid(appid)
         return jsonify({"message": "Insert successful", "appid": appid}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -83,8 +82,8 @@ def db_delete():
         appid = request.args.get("appid", type=int)
         if appid is None:
             return jsonify({"error": "Missing or invalid appid"}), 400
-        
-        db.delete_game_by_appid(appid)
+
+        Db.instance.delete_game_by_appid(appid)
 
         return jsonify({
             "message": "Delete successful",
