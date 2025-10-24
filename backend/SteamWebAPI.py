@@ -2,7 +2,7 @@ import os
 import requests
 
 
-class SteamAPI:
+class SteamWebAPI:
     def __init__(self):
         self.api_key = os.getenv("STEAM_API_KEY")
         if not self.api_key:
