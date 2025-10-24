@@ -16,7 +16,15 @@ wsl --install
 ```
 
 ## RUNNING THE PROJECT
-1. **Build and start containers:**
+1. **Set up .env**  
+In the project root directory, add the file .env and add the following entry:  
+```bash
+STEAM_API_KEY=X
+```
+where X is a key for the Steam Web API. A key can be obtained for free 
+from https://steamcommunity.com/dev
+
+2. **Build and start containers:**
 ```bash
 docker compose up --build
 ```
