@@ -47,8 +47,11 @@ class SteamWebAPI:
 
         Returns:
             None if request fails
-            number of games (int), dict of games{appid: total playtime}
-                playtime is in minutes
+            Dict {
+                    game_count (int),
+                    games: dict {appid (int), playtime (int)}
+                    # playtime is in minutes
+                  }
         """
 
         url = self.url_base + "IPlayerService/GetOwnedGames/v0001/"
@@ -64,13 +67,24 @@ class SteamWebAPI:
             print(response.status_code)
             return None
 
-        response = response.json().get('response')
-        game_count = int(response.get('game_count'))
+        response = response.json().get('response', None)
+        if not response:
+            return None
+        game_count = int(response.get('game_count', 0))
         games = response.get('games', [])
         games_filtered = {}
         for game in games:
             appid = int(game.get('appid'))
-            total_playtime = int(game.get('playtime_forever'))
+            total_playtime = int(game.get('playtime_forever', 0))
             games_filtered[appid] = total_playtime
 
-        return game_count, games_filtered
+        return {
+                "game_count": game_count,
+                "games": games_filtered
+        }
+
+
+s = SteamWebAPI()
+res = s.GetOwnedGames(76561198263948069)
+print(res["game_count"])
+print(res["games"])
