@@ -82,3 +82,6 @@ class SteamWebAPI:
                 "game_count": game_count,
                 "games": games_filtered
         }
+
+
+instance = SteamWebAPI()
