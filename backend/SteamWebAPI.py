@@ -82,9 +82,3 @@ class SteamWebAPI:
                 "game_count": game_count,
                 "games": games_filtered
         }
-
-
-s = SteamWebAPI()
-res = s.GetOwnedGames(76561198263948069)
-print(res["game_count"])
-print(res["games"])
