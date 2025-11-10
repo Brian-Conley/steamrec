@@ -1,6 +1,6 @@
 # DB Schema
 
-## Games
+## games
 The main table of the database, containing general data about every game.
 
 The controller_support attribute uses the following values:
