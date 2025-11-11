@@ -52,3 +52,8 @@ No
 8. Are you comfortable playing games with adult/mature themes?
 Yes  
 No  
+
+9. Do you prefer playing AAA games from large companies or the work of small indie studios?
+AAA games, all the way!  
+Indie games are better!
+I like both.
