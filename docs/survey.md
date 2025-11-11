@@ -18,7 +18,7 @@ Yes! Free game!
 Money is no issue.  
 It does not matter to me.  
 
-4. Which of the following themes appeals to you most?
+4. Which of the following themes appeals to you most?  
 Fantasy  
 Sci-Fi  
 Modern  
@@ -26,7 +26,7 @@ Cyberpunk
 Retro  
 No preference  
 
-5. Which of these genres appeals to you most?
+5. Which of these genres appeals to you most?  
 Racing  
 RPG  
 Strategy  
@@ -40,20 +40,20 @@ Platform
 Simulation  
 No preference  
 
-6. Do you prefer games that are popular?
+6. Do you prefer games that are popular?  
 Yeah!  
 Not particularly...  
 No preference  
 
-7. Do you play games on a virtual reality device?
+7. Do you play games on a virtual reality device?  
 Yes  
 No  
 
-8. Are you comfortable playing games with adult/mature themes?
+8. Are you comfortable playing games with adult/mature themes?  
 Yes  
 No  
 
-9. Do you prefer playing AAA games from large companies or the work of small indie studios?
+9. Do you prefer playing AAA games from large companies or the work of small indie studios?  
 AAA games, all the way!  
 Indie games are better!
 I like both.
