@@ -25,3 +25,17 @@ Modern
 Cyberpunk  
 Retro  
 No preference  
+
+5. Which of these genres appeals to you most?
+Racing  
+RPG  
+Strategy  
+Sports  
+Puzzle  
+Shooter  
+Sandbox  
+Roguelike  
+Fighter  
+Platform  
+Simulation  
+No preference  
