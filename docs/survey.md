@@ -12,3 +12,8 @@ I don't know...
 Singleplayer  
 Multiplayer  
 No preference  
+
+3. Would you prefer a game if it is free?  
+Yes! Free game!    
+Money is no issue.  
+It does not matter to me.  
