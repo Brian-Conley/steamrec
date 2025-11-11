@@ -39,3 +39,8 @@ Fighter
 Platform  
 Simulation  
 No preference  
+
+6. Do you prefer games that are popular?
+Yeah!  
+Not particularly...  
+No preference  
