@@ -8,6 +8,50 @@ class Db:
     def __init__(self, filename):
         self.filename = filename
 
+    def get_app_details(self, appid):
+        game_data = self.query_game_by_appid(appid)
+        if game_data is None:
+            # appid doesn't exist
+            return None
+
+        category_relations = self.query_relation_by_appid('game_categories', appid)
+        tag_relations = self.query_relation_by_appid('game_tags', appid)
+        developer_relations = self.query_relation_by_appid('game_developers', appid)
+        publisher_relations = self.query_relation_by_appid('game_publishers', appid)
+
+        categories = self.query_items_by_id('categories', category_relations)
+        if categories is None:
+            categories = []
+        tags = self.query_items_by_id('tags', tag_relations)
+        if tags is None:
+            tags = []
+        developers = self.query_items_by_id('developers', developer_relations)
+        if developers is None:
+            developers = []
+        publishers = self.query_items_by_id('publishers', publisher_relations)
+        if publishers is None:
+            publishers = []
+
+        return {
+                "appid": game_data[0],
+                "name": game_data[1],
+                "controller_support": game_data[2],
+                "has_achievements": game_data[3],
+                "supports_windows": game_data[4],
+                "supports_mac": game_data[5],
+                "supports_linux": game_data[6],
+                "price": game_data[7],
+                "release_date": game_data[8],
+                "header_image": game_data[9],
+                "positive_reviews": game_data[10],
+                "negative_reviews": game_data[11],
+                "total_reviews": game_data[12],
+                "categories": categories,
+                "tags": tags,
+                "developers": developers,
+                "publishers": publishers
+                }
+
     def query_game_by_appid(self, appid):
         """
         Fetch a game row by its appid
@@ -73,40 +117,81 @@ class Db:
                                     """, tuple(cids)).fetchall()
             return games if games else None
 
-    def query_categories_by_appid(self, appid):
+    def query_relation_by_appid(self, table_name, appid):
         """
-        Fetch all categories associated with an appid
+        Fetch all relations associated with an appid
 
         Params:
+            table_name (string): The name of the desired relation.
+                MUST be one of:
+                    'game_categories', 'game_tags',
+                    'game_developers', 'game_publishers'
+
             appid (int): The game's appid
 
         Returns:
-            list: All category ids associated with the appid
+            list: All relation ids associated with the appid
         """
+        match table_name:
+            case 'game_categories':
+                idname = 'cid'
+            case 'game_tags':
+                idname = 'tid'
+            case 'game_developers':
+                idname = 'did'
+            case 'game_publishers':
+                idname = 'pid'
+            case _:
+                return None
+
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
-            categories = cur.execute("""
-                                     SELECT categoryid FROM game_categories
+
+            categories = cur.execute(f"""
+                                     SELECT {idname} FROM {table_name}
                                      WHERE appid = ?
                                      """, (appid,))
             cids = categories.fetchall()
             return [c[0] for c in cids] if cids else None
 
-    def query_category_by_id(self, cid):
+    def query_items_by_id(self, table_name, cid):
         """
-        Fetch a category name by its id
+        Fetch the name of one or more items using id(s)
 
         Params:
-            cid (int): The category's id
+            table_name (string): The name of the desired table.
+                MUST be one of:
+                    'categories', 'tags', 'developers', 'publishers'
+
+            cid (int or list[int]): The id(s) to look up
 
         Returns:
-            string: Category name
+            string or list[string]: Name(s) associated with the id(s).
         """
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
-            cat = cur.execute("SELECT name FROM categories WHERE id = ?",
-                              (cid,)).fetchone()
-            return cat[0] if cat else None
+
+            valid_tables = ['categories', 'tags', 'developers', 'publishers']
+            if table_name not in valid_tables:
+                return None
+
+            if isinstance(cid, (int, float)):
+                cat = cur.execute(f"""SELECT name FROM {table_name}
+                                        WHERE id = ?""",
+                                  (cid,)).fetchone()
+                name = cat[0] if cat else None
+
+            elif isinstance(cid, list):
+                placeholders = ', '.join(['?'] * len(cid))
+                cat = cur.execute(f"""SELECT name FROM {table_name}
+                                        WHERE id IN ({placeholders})""",
+                                  tuple(cid),).fetchall()
+                name = [n[0] for n in cat]
+
+            else:
+                name = None
+
+            return name
 
     def query_category_by_name(self, name):
         """
