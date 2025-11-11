@@ -44,3 +44,7 @@ No preference
 Yeah!  
 Not particularly...  
 No preference  
+
+7. Do you play games on a virtual reality device?
+Yes  
+No  
