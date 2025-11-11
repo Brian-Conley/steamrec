@@ -48,3 +48,7 @@ No preference
 7. Do you play games on a virtual reality device?
 Yes  
 No  
+
+8. Are you comfortable playing games with adult/mature themes?
+Yes  
+No  
