@@ -7,3 +7,8 @@ Windows
 macOS  
 Linux  
 I don't know...  
+
+2. Do you prefer to play games on your own or play games with friends?  
+Singleplayer  
+Multiplayer  
+No preference  
