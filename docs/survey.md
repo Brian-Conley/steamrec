@@ -17,3 +17,11 @@ No preference
 Yes! Free game!    
 Money is no issue.  
 It does not matter to me.  
+
+4. Which of the following themes appeals to you most?
+Fantasy  
+Sci-Fi  
+Modern  
+Cyberpunk  
+Retro  
+No preference  
