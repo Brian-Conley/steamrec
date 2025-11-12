@@ -160,9 +160,8 @@ class Db:
         Fetch the name of one or more items using id(s)
 
         Params:
-            table_name (string): The name of the desired table.
-                MUST be one of:
-                    'categories', 'tags', 'developers', 'publishers'
+            table_name (string):
+                name of one of the tables defined in self.meta_tables
 
             cid (int or list[int]): The id(s) to look up
 
@@ -198,7 +197,7 @@ class Db:
         Fetch a category id by its name
 
         Params:
-            table_name:
+            table_name (string):
                 name of one of the tables defined in self.meta_tables
 
             name (string): The item's name
