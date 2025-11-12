@@ -7,6 +7,7 @@ _filename = "steam_games.db"
 class Db:
     def __init__(self, filename):
         self.filename = filename
+        self.meta_tables = ['categories', 'tags', 'developers', 'publishers']
 
     def get_app_details(self, appid):
         game_data = self.query_game_by_appid(appid)
@@ -171,8 +172,7 @@ class Db:
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
 
-            valid_tables = ['categories', 'tags', 'developers', 'publishers']
-            if table_name not in valid_tables:
+            if table_name not in self.meta_tables:
                 return None
 
             if isinstance(cid, (int, float)):
@@ -193,20 +193,26 @@ class Db:
 
             return name
 
-    def query_category_by_name(self, name):
+    def query_item_by_name(self, table_name, name):
         """
         Fetch a category id by its name
 
         Params:
-            name (string): The category's name
+            table_name:
+                name of one of the tables defined in self.meta_tables
+
+            name (string): The item's name
 
         Returns:
-            id (int): The category's id
+            id (int): The item's id
         """
+        if table_name not in self.meta_tables:
+            return None
+
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
-            cat = cur.execute("""
-                              SELECT id FROM categories
+            cat = cur.execute(f"""
+                              SELECT id FROM {table_name}
                               WHERE name LIKE ?
                               """, (f"%{name}%",)).fetchone()
             return cat[0] if cat else None
