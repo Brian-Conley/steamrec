@@ -7,6 +7,7 @@ _filename = "steam_games.db"
 class Db:
     def __init__(self, filename):
         self.filename = filename
+        self.meta_tables = ['categories', 'tags', 'developers', 'publishers']
 
     def get_app_details(self, appid):
         game_data = self.query_game_by_appid(appid)
@@ -154,16 +155,15 @@ class Db:
             cids = categories.fetchall()
             return [c[0] for c in cids] if cids else None
 
-    def query_items_by_id(self, table_name, cid):
+    def query_items_by_id(self, table_name, id):
         """
         Fetch the name of one or more items using id(s)
 
         Params:
-            table_name (string): The name of the desired table.
-                MUST be one of:
-                    'categories', 'tags', 'developers', 'publishers'
+            table_name (string):
+                name of one of the tables defined in self.meta_tables
 
-            cid (int or list[int]): The id(s) to look up
+            id (int or list[int]): The id(s) to look up
 
         Returns:
             string or list[string]: Name(s) associated with the id(s).
@@ -171,21 +171,20 @@ class Db:
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
 
-            valid_tables = ['categories', 'tags', 'developers', 'publishers']
-            if table_name not in valid_tables:
+            if table_name not in self.meta_tables:
                 return None
 
-            if isinstance(cid, (int, float)):
+            if isinstance(id, (int, float)):
                 cat = cur.execute(f"""SELECT name FROM {table_name}
                                         WHERE id = ?""",
-                                  (cid,)).fetchone()
+                                  (id,)).fetchone()
                 name = cat[0] if cat else None
 
-            elif isinstance(cid, list):
-                placeholders = ', '.join(['?'] * len(cid))
+            elif isinstance(id, list):
+                placeholders = ', '.join(['?'] * len(id))
                 cat = cur.execute(f"""SELECT name FROM {table_name}
                                         WHERE id IN ({placeholders})""",
-                                  tuple(cid),).fetchall()
+                                  tuple(id),).fetchall()
                 name = [n[0] for n in cat]
 
             else:
@@ -193,20 +192,26 @@ class Db:
 
             return name
 
-    def query_category_by_name(self, name):
+    def query_item_by_name(self, table_name, name):
         """
         Fetch a category id by its name
 
         Params:
-            name (string): The category's name
+            table_name (string):
+                name of one of the tables defined in self.meta_tables
+
+            name (string): The item's name
 
         Returns:
-            id (int): The category's id
+            id (int): The item's id
         """
+        if table_name not in self.meta_tables:
+            return None
+
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
-            cat = cur.execute("""
-                              SELECT id FROM categories
+            cat = cur.execute(f"""
+                              SELECT id FROM {table_name}
                               WHERE name LIKE ?
                               """, (f"%{name}%",)).fetchone()
             return cat[0] if cat else None
@@ -218,11 +223,23 @@ class Db:
             count = cur.execute("SELECT COUNT(*) FROM games")
             return count.fetchone()[0]
 
-    def query_category_count(self):
-        # Total number of categories
+    def query_item_count(self, table_name):
+        """
+        Get the number of items in a table.
+
+        Params:
+            table_name (string):
+                MUST be one of the values defined in self.meta_tables
+
+        Returns:
+            int: Number of items in the table
+        """
+        if table_name not in self.meta_tables:
+            return None
+
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
-            count = cur.execute("SELECT COUNT(*) FROM categories")
+            count = cur.execute(f"SELECT COUNT(*) FROM {table_name}")
             return count.fetchone()[0]
 
     def get_game_table_column_names(self):
