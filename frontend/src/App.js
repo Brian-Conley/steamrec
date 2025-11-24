@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 function App() {
   const [id, setId] = useState("");              // Store the input ID
+  const [tags, setTags] = useState("");          // store comma-separated tags
   const [price, setPrice] = useState("");        // New input for game price
   const [data, setData] = useState(null);        // Store fetched JSON object
   const [error, setError] = useState(null);      // Store error message
@@ -52,6 +53,27 @@ function App() {
       .then((res) => res.json())
   };
 
+  const fetchByTags = () => {
+    if (!tags) return;
+    setLoading(true);
+    setError(null);
+    setData(null);
+
+    fetch(`http://localhost:5000/db/searchByTags?tags=${encodeURIComponent(tags)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Error: ${res.status} ${res.statusText}`);
+        return res.json();
+      })
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  };
+
   return (
     <div>
       <h3>Game Database</h3>
@@ -68,9 +90,16 @@ function App() {
       value={price}
       onChange={(e) => setPrice(e.target.value)}
       />
+      <input
+        type="text"
+        placeholder="Search by tags (e.g. action,rpg)"
+        value={tags}
+        onChange={(e) => setTags(e.target.value)}
+      />
 
       <div style={{ marginTop: "1rem" }}>
         <button onClick={fetchByID}>Fetch</button>
+        <button onClick={fetchByTags}>Search by Tags</button>
         <button onClick={insertGame}>Insert</button>
         <button onClick={updateGame}>Update</button>
         <button onClick={deleteGame}>Delete</button>
