@@ -106,6 +106,38 @@ class Db:
                                (f"%{name}%",)).fetchall()
             return game if game else None
 
+    def query_games_by_tags(self, tids, match_all=True):
+        """
+        Fetch every game matching the tag filters
+
+        Params:
+            tids (int[]): A list of all tag ids
+            match_all (bool): Match every filter / Match any filter
+
+        Returns:
+            A list of games matching the filter
+        """
+        with sqlite3.connect(self.filename) as conn:
+            if len(tids) == 0:
+                return []
+            cur = conn.cursor()
+            placeholders = ','.join('?' * len(tids))
+            if match_all:
+                games = cur.execute(f"""
+                                    SELECT DISTINCT appid
+                                    FROM game_tags
+                                    WHERE tid IN ({placeholders})
+                                    GROUP BY appid
+                                    HAVING COUNT(DISTINCT tid) = ?
+                                    """, tuple(tids) + (len(tids),)).fetchall()
+            else:
+                games = cur.execute(f"""
+                                    SELECT DISTINCT appid
+                                    FROM game_tags
+                                    WHERE tid IN ({placeholders})
+                                    """, tuple(tids)).fetchall()
+            return [appid[0] for appid in games] if games else None
+
     def query_games_by_categories(self, cids, match_all=True):
         """
         Fetch every game matching the category filters
