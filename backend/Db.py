@@ -70,6 +70,26 @@ class Db:
                     (appid,)).fetchone()
             return game if game else None
 
+    def query_appid_by_name(self, name):
+        """
+        Fetch all appids of games matching the given name pattern
+
+        Params:
+            name (string): Game name
+
+        Returns:
+            array[int]: All appids matching the pattern
+        """
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            appids = cur.execute(
+                    """
+                    SELECT appid FROM games
+                    WHERE name LIKE ?;
+                    """,
+                    (f"%{name}%",)).fetchall()
+            return [t[0] for t in appids] if appids else []
+
     def query_game_by_name(self, name):
         """
         Fetch a game row by its name
