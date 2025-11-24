@@ -158,15 +158,15 @@ class Db:
                 games = cur.execute(f"""
                                     SELECT DISTINCT appid
                                     FROM game_categories
-                                    WHERE categoryid IN ({placeholders})
+                                    WHERE cid IN ({placeholders})
                                     GROUP BY appid
-                                    HAVING COUNT(DISTINCT categoryid) = ?
+                                    HAVING COUNT(DISTINCT cid) = ?
                                     """, tuple(cids) + (len(cids),)).fetchall()
             else:
                 games = cur.execute(f"""
                                     SELECT DISTINCT appid
                                     FROM game_categories
-                                    WHERE categoryid IN ({placeholders})
+                                    WHERE cid IN ({placeholders})
                                     """, tuple(cids)).fetchall()
             return games if games else None
 
