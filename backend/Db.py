@@ -330,6 +330,22 @@ class Db:
             "header_image": appdata.get("header_image"),
         }
 
+        appss = ssa.get_steam_app_details_steamspy(appid)
+        if appss.get("success"):
+            info["reviews_positive"] = appss.get("reviews_positive")
+            info["reviews_negative"] = appss.get("reviews_negative")
+            info["reviews_total"] = appss.get("reviews_total")
+            info["tags"] = appss.get("tags")
+            info["developers"] = appss.get("developers")
+            info["publishers"] = appss.get("publishers")
+        else:
+            info["reviews_positive"] = None
+            info["reviews_negative"] = None
+            info["reviews_total"] = None
+            info["tags"] = []
+            info["developers"] = []
+            info["publishers"] = []
+
         supp = info["controller_support"]
         if supp == "none":
             supp = 0
@@ -340,15 +356,42 @@ class Db:
         else:
             supp = 3
 
+        # Insert any potential new developers/publishers/tags
+        developers = info.get("developers")
+        publishers = info.get("publishers")
+        tags = info.get("tags")
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            for developer in developers:
+                cur.execute("""
+                            INSERT OR IGNORE INTO developers (name)
+                            VALUES (?);
+                            """, (developer,))
+
+            for publisher in publishers:
+                cur.execute("""
+                            INSERT OR IGNORE INTO publishers (name)
+                            VALUES (?);
+                            """, (publisher,))
+
+            for tag in tags:
+                cur.execute("""
+                            INSERT OR IGNORE INTO tags (name)
+                            VALUES (?);
+                            """, (tag,))
+
+            conn.commit()
+
+        # Insert app data into db
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
             cur.execute("""
                         INSERT OR REPLACE INTO games (
                             appid, name, controller_support, has_achievements,
                             supports_windows, supports_mac, supports_linux,
-                            price, total_recommendations, release_date,
-                            header_image
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            price, release_date, header_image,
+                            positive_reviews, negative_reviews, total_reviews
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (
                         appid,
                         info["name"],
@@ -361,7 +404,47 @@ class Db:
                         info["total_recommendations"],
                         info["release_date"],
                         info["header_image"],
+                        info["reviews_positive"],
+                        info["reviews_negative"],
+                        info["reviews_total"]
                         ))
+
+            for developer in developers:
+                did = cur.execute(
+                    """
+                    SELECT id FROM developers
+                    WHERE name = ?;
+                    """, (developer,)).fetchone()[0]
+                cur.execute(
+                    """
+                    INSERT OR IGNORE INTO game_developers (appid, did)
+                    VALUES (?, ?);
+                    """, (appid, did,))
+
+            for publisher in publishers:
+                pid = cur.execute(
+                    """
+                    SELECT id FROM publishers
+                    WHERE name = ?;
+                        """, (publisher,)).fetchone()[0]
+                cur.execute(
+                    """
+                    INSERT OR IGNORE INTO game_publishers (appid, pid)
+                    VALUES (?, ?);
+                    """, (appid, pid,))
+
+            for tag in tags:
+                tid = cur.execute(
+                    """
+                    SELECT id FROM tags
+                    WHERE name = ?;
+                    """, (tag,)).fetchone()[0]
+                cur.execute(
+                    """
+                    INSERT OR IGNORE INTO game_tags (appid, tid)
+                    VALUES (?, ?);
+                    """, (appid, tid,))
+
             conn.commit()
             return 0  # success
 
