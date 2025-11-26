@@ -9,6 +9,11 @@ class Db:
         self.filename = filename
         self.meta_tables = ['categories', 'tags', 'developers', 'publishers']
 
+    def get_app_list(self):
+        with sqlite3.connect(self.filename) as conn:
+            appids = conn.execute("SELECT appid FROM games;").fetchall()
+            return [id[0] for id in appids]
+
     def get_app_details(self, appid):
         game_data = self.query_game_by_appid(appid)
         if game_data is None:
