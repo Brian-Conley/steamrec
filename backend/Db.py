@@ -9,6 +9,11 @@ class Db:
         self.filename = filename
         self.meta_tables = ['categories', 'tags', 'developers', 'publishers']
 
+    def get_app_list(self):
+        with sqlite3.connect(self.filename) as conn:
+            appids = conn.execute("SELECT appid FROM games;").fetchall()
+            return [id[0] for id in appids]
+
     def get_app_details(self, appid):
         game_data = self.query_game_by_appid(appid)
         if game_data is None:
@@ -70,6 +75,26 @@ class Db:
                     (appid,)).fetchone()
             return game if game else None
 
+    def query_appid_by_name(self, name):
+        """
+        Fetch all appids of games matching the given name pattern
+
+        Params:
+            name (string): Game name
+
+        Returns:
+            array[int]: All appids matching the pattern
+        """
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            appids = cur.execute(
+                    """
+                    SELECT appid FROM games
+                    WHERE name LIKE ?;
+                    """,
+                    (f"%{name}%",)).fetchall()
+            return [t[0] for t in appids] if appids else []
+
     def query_game_by_name(self, name):
         """
         Fetch a game row by its name
@@ -85,6 +110,38 @@ class Db:
             game = cur.execute("SELECT * FROM games WHERE name LIKE ?",
                                (f"%{name}%",)).fetchall()
             return game if game else None
+
+    def query_games_by_tags(self, tids, match_all=True):
+        """
+        Fetch every game matching the tag filters
+
+        Params:
+            tids (int[]): A list of all tag ids
+            match_all (bool): Match every filter / Match any filter
+
+        Returns:
+            A list of games matching the filter
+        """
+        with sqlite3.connect(self.filename) as conn:
+            if len(tids) == 0:
+                return []
+            cur = conn.cursor()
+            placeholders = ','.join('?' * len(tids))
+            if match_all:
+                games = cur.execute(f"""
+                                    SELECT DISTINCT appid
+                                    FROM game_tags
+                                    WHERE tid IN ({placeholders})
+                                    GROUP BY appid
+                                    HAVING COUNT(DISTINCT tid) = ?
+                                    """, tuple(tids) + (len(tids),)).fetchall()
+            else:
+                games = cur.execute(f"""
+                                    SELECT DISTINCT appid
+                                    FROM game_tags
+                                    WHERE tid IN ({placeholders})
+                                    """, tuple(tids)).fetchall()
+            return [appid[0] for appid in games] if games else None
 
     def query_games_by_categories(self, cids, match_all=True):
         """
@@ -106,15 +163,15 @@ class Db:
                 games = cur.execute(f"""
                                     SELECT DISTINCT appid
                                     FROM game_categories
-                                    WHERE categoryid IN ({placeholders})
+                                    WHERE cid IN ({placeholders})
                                     GROUP BY appid
-                                    HAVING COUNT(DISTINCT categoryid) = ?
+                                    HAVING COUNT(DISTINCT cid) = ?
                                     """, tuple(cids) + (len(cids),)).fetchall()
             else:
                 games = cur.execute(f"""
                                     SELECT DISTINCT appid
                                     FROM game_categories
-                                    WHERE categoryid IN ({placeholders})
+                                    WHERE cid IN ({placeholders})
                                     """, tuple(cids)).fetchall()
             return games if games else None
 
@@ -278,6 +335,22 @@ class Db:
             "header_image": appdata.get("header_image"),
         }
 
+        appss = ssa.get_steam_app_details_steamspy(appid)
+        if appss.get("success"):
+            info["reviews_positive"] = appss.get("reviews_positive")
+            info["reviews_negative"] = appss.get("reviews_negative")
+            info["reviews_total"] = appss.get("reviews_total")
+            info["tags"] = appss.get("tags")
+            info["developers"] = appss.get("developers")
+            info["publishers"] = appss.get("publishers")
+        else:
+            info["reviews_positive"] = None
+            info["reviews_negative"] = None
+            info["reviews_total"] = None
+            info["tags"] = []
+            info["developers"] = []
+            info["publishers"] = []
+
         supp = info["controller_support"]
         if supp == "none":
             supp = 0
@@ -288,15 +361,42 @@ class Db:
         else:
             supp = 3
 
+        # Insert any potential new developers/publishers/tags
+        developers = info.get("developers")
+        publishers = info.get("publishers")
+        tags = info.get("tags")
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            for developer in developers:
+                cur.execute("""
+                            INSERT OR IGNORE INTO developers (name)
+                            VALUES (?);
+                            """, (developer,))
+
+            for publisher in publishers:
+                cur.execute("""
+                            INSERT OR IGNORE INTO publishers (name)
+                            VALUES (?);
+                            """, (publisher,))
+
+            for tag in tags:
+                cur.execute("""
+                            INSERT OR IGNORE INTO tags (name)
+                            VALUES (?);
+                            """, (tag,))
+
+            conn.commit()
+
+        # Insert app data into db
         with sqlite3.connect(self.filename) as conn:
             cur = conn.cursor()
             cur.execute("""
                         INSERT OR REPLACE INTO games (
                             appid, name, controller_support, has_achievements,
                             supports_windows, supports_mac, supports_linux,
-                            price, total_recommendations, release_date,
-                            header_image
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            price, release_date, header_image,
+                            positive_reviews, negative_reviews, total_reviews
+                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (
                         appid,
                         info["name"],
@@ -309,7 +409,47 @@ class Db:
                         info["total_recommendations"],
                         info["release_date"],
                         info["header_image"],
+                        info["reviews_positive"],
+                        info["reviews_negative"],
+                        info["reviews_total"]
                         ))
+
+            for developer in developers:
+                did = cur.execute(
+                    """
+                    SELECT id FROM developers
+                    WHERE name = ?;
+                    """, (developer,)).fetchone()[0]
+                cur.execute(
+                    """
+                    INSERT OR IGNORE INTO game_developers (appid, did)
+                    VALUES (?, ?);
+                    """, (appid, did,))
+
+            for publisher in publishers:
+                pid = cur.execute(
+                    """
+                    SELECT id FROM publishers
+                    WHERE name = ?;
+                        """, (publisher,)).fetchone()[0]
+                cur.execute(
+                    """
+                    INSERT OR IGNORE INTO game_publishers (appid, pid)
+                    VALUES (?, ?);
+                    """, (appid, pid,))
+
+            for tag in tags:
+                tid = cur.execute(
+                    """
+                    SELECT id FROM tags
+                    WHERE name = ?;
+                    """, (tag,)).fetchone()[0]
+                cur.execute(
+                    """
+                    INSERT OR IGNORE INTO game_tags (appid, tid)
+                    VALUES (?, ?);
+                    """, (appid, tid,))
+
             conn.commit()
             return 0  # success
 
