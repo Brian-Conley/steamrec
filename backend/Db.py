@@ -15,48 +15,72 @@ class Db:
             return [id[0] for id in appids]
 
     def get_app_details(self, appid):
-        game_data = self.query_game_by_appid(appid)
-        if game_data is None:
-            # appid doesn't exist
-            return None
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            game = cur.execute(
+                """
+                SELECT
+                    g.appid,
+                    g.name,
+                    g.controller_support,
+                    g.has_achievements,
+                    g.supports_windows,
+                    g.supports_mac,
+                    g.supports_linux,
+                    g.price,
+                    g.release_date,
+                    g.header_image,
+                    g.positive_reviews,
+                    g.negative_reviews,
+                    g.total_reviews,
+                    GROUP_CONCAT(DISTINCT c.name) AS categories,
+                    GROUP_CONCAT(DISTINCT t.name) AS tags,
+                    GROUP_CONCAT(DISTINCT d.name) AS developers,
+                    GROUP_CONCAT(DISTINCT p.name) AS publishers
+                FROM games g
 
-        category_relations = self.query_relation_by_appid('game_categories', appid)
-        tag_relations = self.query_relation_by_appid('game_tags', appid)
-        developer_relations = self.query_relation_by_appid('game_developers', appid)
-        publisher_relations = self.query_relation_by_appid('game_publishers', appid)
+                LEFT JOIN game_categories gc ON g.appid = gc.appid
+                LEFT JOIN categories c ON gc.cid = c.id
 
-        categories = self.query_items_by_id('categories', category_relations)
-        if categories is None:
-            categories = []
-        tags = self.query_items_by_id('tags', tag_relations)
-        if tags is None:
-            tags = []
-        developers = self.query_items_by_id('developers', developer_relations)
-        if developers is None:
-            developers = []
-        publishers = self.query_items_by_id('publishers', publisher_relations)
-        if publishers is None:
-            publishers = []
+                LEFT JOIN game_tags gt ON g.appid = gt.appid
+                LEFT JOIN tags t ON gt.tid = t.id
 
-        return {
-                "appid": game_data[0],
-                "name": game_data[1],
-                "controller_support": game_data[2],
-                "has_achievements": game_data[3],
-                "supports_windows": game_data[4],
-                "supports_mac": game_data[5],
-                "supports_linux": game_data[6],
-                "price": game_data[7],
-                "release_date": game_data[8],
-                "header_image": game_data[9],
-                "positive_reviews": game_data[10],
-                "negative_reviews": game_data[11],
-                "total_reviews": game_data[12],
-                "categories": categories,
-                "tags": tags,
-                "developers": developers,
-                "publishers": publishers
-                }
+                LEFT JOIN game_developers gd ON g.appid = gd.appid
+                LEFT JOIN developers d ON gd.did = d.id
+
+                LEFT JOIN game_publishers gp ON g.appid = gp.appid
+                LEFT JOIN publishers p ON gp.pid = p.id
+
+                WHERE g.appid = ?
+                GROUP BY g.appid;
+                """, ((appid,))
+            ).fetchone()
+
+            categories = game[13].split(',') if game[13] else []
+            tags = game[14].split(',') if game[14] else []
+            developers = game[15].split(',') if game[15] else []
+            publishers = game[16].split(',') if game[16] else []
+
+            details = {
+                    "appid": game[0],
+                    "name": game[1],
+                    "controller_support": game[2],
+                    "has_achievements": game[3],
+                    "supports_windows": game[4],
+                    "supports_mac": game[5],
+                    "supports_linux": game[6],
+                    "price": game[7],
+                    "release_date": game[8],
+                    "header_image": game[9],
+                    "positive_reviews": game[10],
+                    "negative_reviews": game[11],
+                    "total_reviews": game[12],
+                    "categories": categories,
+                    "tags": tags,
+                    "developers": developers,
+                    "publishers": publishers
+                    }
+            return details
 
     def query_game_by_appid(self, appid):
         """
