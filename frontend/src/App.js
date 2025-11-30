@@ -7,6 +7,7 @@ function App() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [steamId, setSteamId] = useState("");
 
   // Helper fetch wrapper
   const doFetch = (url, options = {}) => {
@@ -32,6 +33,11 @@ function App() {
   const fetchByID = () => {
     if (!id) return;
     doFetch(`http://localhost:5000/db/game?appid=${encodeURIComponent(id)}`);
+  };
+
+  const fetchByLibrary = () => {
+    if (!steamId) return;
+    doFetch(`http://localhost:5000/steam/library?steamid=${encodeURIComponent(steamId)}`);
   };
 
   const insertGame = () => {
@@ -136,10 +142,17 @@ function App() {
         value={tags}
         onChange={(e) => setTags(e.target.value)}
       />
+      <input
+        type="text"
+        placeholder="Enter SteamID to fetch recommendations"
+        value={steamId}
+        onChange={(e) => setSteamId(e.target.value)}
+      />
 
       <div style={{ marginTop: "1rem" }}>
         <button onClick={fetchByID}>Fetch</button>
         <button onClick={fetchByTags}>Search by Tags</button>
+        <button onClick={fetchByLibrary}>Search by SteamID</button>
         <button onClick={insertGame}>Insert</button>
         <button onClick={updateGame}>Update</button>
         <button onClick={deleteGame}>Delete</button>
