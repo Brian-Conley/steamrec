@@ -94,7 +94,7 @@ function App() {
               <p><strong>App ID:</strong> {game.appid}</p>
 
               {game.price !== undefined && (
-                <p><strong>Price:</strong> ${game.price}</p>
+              <p><strong>Price:</strong> ${(game.price / 100).toFixed(2)}</p>
               )}
 
               {game.tags && (
