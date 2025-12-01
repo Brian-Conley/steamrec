@@ -122,7 +122,7 @@ function App() {
   };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial" }}>
+    <div>
       <h2>Steam Game Recommendations</h2>
 
       <input
@@ -162,7 +162,7 @@ function App() {
         onChange={(e) => setMinReviews(e.target.value)}
       />
 
-      <div style={{ marginTop: "1rem" }}>
+      <div>
         <button onClick={fetchByID}>Fetch</button>
         <button onClick={fetchByTags}>Search by Tags</button>
         <button onClick={fetchByLibrary}>Search by SteamID</button>
@@ -177,7 +177,7 @@ function App() {
 
       {/* JSON fallback */}
       {data && !Array.isArray(data) && (
-        <pre style={{ backgroundColor: "#f0f0f0", padding: "1rem" }}>
+        <pre>
           {JSON.stringify(data, null, 2)}
         </pre>
       )}
