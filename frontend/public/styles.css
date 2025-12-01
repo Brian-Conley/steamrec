@@ -1,0 +1,157 @@
+/* ---------- GLOBAL STYLES ---------- */
+
+:root {
+    --blue-bg: #0b1e39;
+    --blue-accent: #143a70;
+    --yellow: #ffd447;
+    --yellow-hover: #ffdf6b;
+    --white: #ffffff;
+    --card-bg: #f7faff;
+    --text-light: #d6e2f0;
+    --border-light: rgba(255, 255, 255, 0.15);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--blue-bg);
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: var(--white);
+}
+
+/* ---------- PAGE TITLES ---------- */
+
+h1, h2, h3, h4 {
+    color: var(--yellow);
+    margin-bottom: 0.5rem;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+/* ---------- MAIN APP CONTAINER ---------- */
+
+#root > div {
+    background: var(--blue-accent);
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border-light);
+}
+
+/* ---------- INPUTS ---------- */
+
+input {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.65rem;
+    border-radius: 8px;
+    border: 1px solid var(--yellow);
+    background: var(--blue-bg);
+    color: var(--white);
+    font-size: 1rem;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--yellow-hover);
+    box-shadow: 0 0 8px rgba(255, 212, 71, 0.6);
+}
+
+/* ---------- BUTTONS ---------- */
+
+button {
+    margin: 0.4rem 0.3rem 0.4rem 0;
+    padding: 0.6rem 1.1rem;
+    border-radius: 8px;
+    border: 2px solid var(--yellow);
+    background: var(--yellow);
+    font-weight: 600;
+    cursor: pointer;
+    color: #202020;
+    transition: 0.2s ease-in-out;
+}
+
+button:hover {
+    background: var(--yellow-hover);
+    border-color: var(--yellow-hover);
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* ---------- LOADING / ERROR ---------- */
+
+p {
+    color: var(--text-light);
+}
+
+p[style*="color: red"] {
+    color: #ff8a8a !important;
+    font-weight: bold;
+}
+
+/* ---------- JSON BLOCK ---------- */
+
+pre {
+    background: #122844 !important;
+    color: var(--yellow);
+    border: 1px solid var(--yellow);
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+/* ---------- RECOMMENDATION CARDS ---------- */
+
+.recommendations {
+    margin-top: 1.2rem;
+}
+
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.card {
+    background: var(--card-bg);
+    width: 260px;
+    padding: 1rem;
+    border-radius: 12px;
+    color: #1a1a1a;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card h4 {
+    color: #0b1e39;
+    margin-top: 0;
+}
+
+.card a {
+    text-decoration: none;
+    color: var(--blue-accent);
+    font-weight: bold;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive improvements */
+@media (max-width: 600px) {
+    #root > div {
+        padding: 1.2rem;
+    }
+
+    input, button {
+        font-size: 0.9rem;
+    }
+}
