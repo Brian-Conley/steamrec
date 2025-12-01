@@ -90,21 +90,12 @@ function App() {
     if (!Array.isArray(list)) return null;
 
     return (
-      <div style={{ marginTop: "1rem" }}>
+      <div className="recommendations">
         <h3>Recommended Games</h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-          {list.map((game) => (
-            <div
-              key={game.appid}
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                padding: "1rem",
-                width: "260px",
-                background: "#fafafa",
-              }}
-            >
-              <h4>{game.name || "Unknown Title"}</h4>
+          <div className="cards">
+            {list.map((game) => (
+              <div key={game.appid} className="card">
+                <h4>{game.name || "Unknown Title"}</h4>
 
               <p><strong>App ID:</strong> {game.appid}</p>
 
