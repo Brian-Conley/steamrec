@@ -56,6 +56,9 @@ class Db:
                 """, ((appid,))
             ).fetchone()
 
+            if game is None:
+                return None
+
             categories = game[13].split(',') if game[13] else []
             tags = game[14].split(',') if game[14] else []
             developers = game[15].split(',') if game[15] else []

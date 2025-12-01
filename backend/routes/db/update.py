@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 import Db
-import app
+from flask_app import app
 
 
-@app.app.route("/db/update", methods=["PUT"])
+@app.route("/db/update", methods=["PUT"])
 def db_update():
     try:
         data = request.get_json(force=True)

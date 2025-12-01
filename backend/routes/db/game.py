@@ -1,10 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import Db
-import app
+from flask_app import app
 
 
-@app.app.route("/db/game")
+@app.route("/db/game")
 def db_game():
     # Usage: http://localhost:5000/db/game?appid=X
     try:

@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 import Db
-import app
+from flask_app import app
 
 
-@app.app.route("/db/delete", methods=["DELETE"])
+@app.route("/db/delete", methods=["DELETE"])
 def db_delete():
     try:
         appid = request.args.get("appid", type=int)

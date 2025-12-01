@@ -37,10 +37,63 @@ function App() {
     doFetch(`http://localhost:5000/db/game?appid=${encodeURIComponent(id)}`);
   };
 
-  const fetchByLibrary = () => {
+  const fetchByLibrary = async () => {
     if (!steamId) return;
-    doFetch(`http://localhost:5000/steam/library?steamid=${encodeURIComponent(steamId)}`);
+
+    setLoading(true);
+    setError(null);
+    setData(null);
+
+    try {
+      // Sync user library
+      const syncRes = await fetch(`http://localhost:5000/sync_user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ steamid: steamId }),
+      });
+
+      if (!syncRes.ok) {
+        const errText = await syncRes.text();
+        throw new Error(`Sync failed: ${errText}`);
+      }
+
+      const syncJson = await syncRes.json();
+
+      // Show the result of syncing (game count)
+      setData(syncJson);
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const fetchRecommendations = async () => {
+  if (!steamId) return;
+
+  setLoading(true);
+  setError(null);
+  setData(null);
+
+  try {
+    const recRes = await fetch(
+      `http://localhost:5000/recommend?steamid=${encodeURIComponent(steamId)}`
+    );
+
+    if (!recRes.ok) {
+      const errText = await recRes.text();
+      throw new Error(`Recommendation failed: ${errText}`);
+    }
+
+    const recJson = await recRes.json();
+    setData(recJson); // will trigger your recommendation cards
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const insertGame = () => {
     doFetch(`http://localhost:5000/db/insert?appid=${encodeURIComponent(id)}`, {
@@ -166,6 +219,7 @@ function App() {
         <button onClick={fetchByID}>Fetch</button>
         <button onClick={fetchByTags}>Search by Tags</button>
         <button onClick={fetchByLibrary}>Search by SteamID</button>
+        <button onClick={fetchRecommendations}>Recommend Based on Library</button>
         <button onClick={fetchUnpopular}>Search for Hidden Gems</button>
         <button onClick={insertGame}>Insert</button>
         <button onClick={updateGame}>Update</button>
@@ -180,6 +234,20 @@ function App() {
         <pre>
           {JSON.stringify(data, null, 2)}
         </pre>
+      )}
+
+      {/* Show owned library list */}
+      {data && data.owned_games && !Array.isArray(data) && (
+        <div className="library">
+          <h3>Owned Games ({data.total_games})</h3>
+          <ul>
+            {data.owned_games.map(g => (
+              <li key={g.appid}>
+                {g.name} (AppID: {g.appid})
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* Recommendation cards */}
