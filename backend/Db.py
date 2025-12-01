@@ -425,21 +425,20 @@ class Db:
                             positive_reviews, negative_reviews, total_reviews
                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (
-                        appid,
-                        info["name"],
-                        supp,
-                        info["has_achievements"],
-                        info["supports_windows"],
-                        info["supports_mac"],
-                        info["supports_linux"],
-                        info["price"],
-                        info["total_recommendations"],
-                        info["release_date"],
-                        info["header_image"],
-                        info["reviews_positive"],
-                        info["reviews_negative"],
-                        info["reviews_total"]
-                        ))
+                            appid,
+                            info["name"],
+                            supp,
+                            info["has_achievements"],
+                            info["supports_windows"],
+                            info["supports_mac"],
+                            info["supports_linux"],
+                            info["price"],
+                            info["release_date"],
+                            info["header_image"],
+                            info["reviews_positive"],
+                            info["reviews_negative"],
+                            info["reviews_total"]
+                            ))
 
             for developer in developers:
                 did = cur.execute(
