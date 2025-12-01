@@ -1,11 +1,8 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-import app
+from flask_app import app
+from flask import Blueprint, jsonify
 
+hello_bp = Blueprint("hello", __name__)
 
-@app.app.route("/api/hello")
+@hello_bp.route("/hello", methods=["GET"])
 def hello():
-    return jsonify(
-            {"message": "Hello, World!\n IF YOU CAN READ THIS IT WORKS"}
-            )
-
+    return jsonify({"message": "Hello from backend!"})

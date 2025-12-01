@@ -1,9 +1,9 @@
 from flask import jsonify
 import Db
-import app
+from flask_app import app
 
 
-@app.app.route("/recommend/hidden-gems")
+@app.route("/recommend/hidden-gems")
 def hidden_gems():
     # Usage: http://localhost:5000/recommend/hidden-gems
     candidates = Db.instance.custom_query(

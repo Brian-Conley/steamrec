@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 import Db
-import app
+from flask_app import app
 
 
-@app.app.route("/db/insert", methods=["POST"])
+@app.route("/db/insert", methods=["POST"])
 def db_insert():
     try:
         appid = request.args.get("appid", type=int)
