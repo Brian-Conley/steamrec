@@ -8,8 +8,6 @@ function App() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [steamId, setSteamId] = useState("");
-  const [maxPlayers, setMaxPlayers] = useState("");
-  const [minReviews, setMinReviews] = useState("");
 
   // Helper fetch wrapper
   const doFetch = (url, options = {}) => {
@@ -129,11 +127,7 @@ function App() {
   };
 
   const fetchUnpopular = () => {
-    const qs = new URLSearchParams();
-    if (maxPlayers) qs.append("max_players", maxPlayers);
-    if (minReviews) qs.append("min_reviews", minReviews);
-
-    doFetch(`http://localhost:5000/db/unpopular?${qs.toString()}`);
+    doFetch(`http://localhost:5000/recommend/hidden-gems`);
   };
 
   // ---------------------
@@ -153,7 +147,7 @@ function App() {
               <p><strong>App ID:</strong> {game.appid}</p>
 
               {game.price !== undefined && (
-                <p><strong>Price:</strong> ${game.price}</p>
+              <p><strong>Price:</strong> ${(game.price / 100).toFixed(2)}</p>
               )}
 
               {game.tags && (
@@ -201,18 +195,6 @@ function App() {
         placeholder="Enter SteamID to fetch recommendations"
         value={steamId}
         onChange={(e) => setSteamId(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Max player count (e.g. < 100)"
-        value={maxPlayers}
-        onChange={(e) => setMaxPlayers(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Min reviews"
-        value={minReviews}
-        onChange={(e) => setMinReviews(e.target.value)}
       />
 
       <div>

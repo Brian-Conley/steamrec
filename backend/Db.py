@@ -493,5 +493,11 @@ class Db:
                         (price, appid,))
             conn.commit()
 
+    def custom_query(self, query):
+        with sqlite3.connect(self.filename) as conn:
+            cur = conn.cursor()
+            cur.execute(query)
+            return cur.fetchall()
+
 
 instance = Db(_filename)
