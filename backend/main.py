@@ -4,6 +4,7 @@ import routes.db.game
 import routes.db.insert
 import routes.db.delete
 import routes.db.update
+import routes.recommend.gems
 import tarfile
 
 
