@@ -127,7 +127,7 @@ function App() {
   };
 
   const fetchUnpopular = () => {
-    doFetch(`http://localhost:5000/recommend/hidden-gems`);
+    doFetch(`http://localhost:5000/recommend/hidden-gems?steamid=${encodeURIComponent(steamId)}`);
   };
 
   // ---------------------
