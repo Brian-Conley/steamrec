@@ -92,8 +92,18 @@ function MainPage() {
   };
 
   const fetchUnpopular = () => {
-    doFetch(`http://localhost:5000/recommend/hidden-gems`);
-  };
+  if (!steamId) {
+    setError("Please enter a SteamID first.");
+    return;
+  }
+
+  doFetch(
+    `http://localhost:5000/recommend/hidden-gems?steamid=${encodeURIComponent(
+      steamId
+    )}`
+  );
+};
+
 
   const insertGame = () => {
     doFetch(
