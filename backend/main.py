@@ -4,8 +4,9 @@ from flask_app import app
 from routes.hello import hello_bp
 from routes.recommend.sync_user import sync_user_bp
 from routes.recommend.recommender import recommend_bp
+from routes.db.search import search_bp
 
-# DB-related routes
+# DB-related route modules (auto-register)
 import routes.db.game
 import routes.db.insert
 import routes.db.delete
@@ -15,10 +16,9 @@ import routes.recommend.gems
 import tarfile
 import sqlite3
 
-
-# ---------------------------
-# Ensure user table exists
-# ---------------------------
+# ----------------------------------------------------
+# Ensure user-owned-games table exists
+# ----------------------------------------------------
 def ensure_user_table():
     conn = sqlite3.connect("steam_games.db")
     cur = conn.cursor()
@@ -36,20 +36,18 @@ def ensure_user_table():
 
 ensure_user_table()
 
-
-# ---------------------------
-# Register blueprints
-# ---------------------------
+# ----------------------------------------------------
+# Register Blueprints
+# ----------------------------------------------------
 app.register_blueprint(hello_bp)
 app.register_blueprint(sync_user_bp)
 app.register_blueprint(recommend_bp)
+app.register_blueprint(search_bp)   # <---- FIXED LINE
 
-
-# ---------------------------
-# Run server
-# ---------------------------
+# ----------------------------------------------------
+# Start Server
+# ----------------------------------------------------
 if __name__ == "__main__":
-    # Extract DB if needed
     with tarfile.open("steam_games.db.tar.gz", "r:gz") as tar:
         tar.extractall(path=".")
 
