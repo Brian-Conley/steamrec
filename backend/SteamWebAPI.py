@@ -83,5 +83,28 @@ class SteamWebAPI:
                 "games": games_filtered
         }
 
+    def ResolveVanityURL(self, vanity):
+        """
+        Resolves a Steam vanity name into a SteamID64 string.
+        Returns the SteamID64 string on success, or None on failure.
+        """
+        try:
+            url = (
+                "https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/"
+                f"?key={self.api_key}&vanityurl={vanity}"
+            )
+
+            res = requests.get(url, timeout=5).json()
+            response = res.get("response", {})
+
+            if response.get("success") == 1 and "steamid" in response:
+                return response["steamid"]  # ✔ return just the ID string
+
+            return None
+
+        except Exception as e:
+            print("ResolveVanityURL ERROR:", e)
+            return None
+
 
 instance = SteamWebAPI()
