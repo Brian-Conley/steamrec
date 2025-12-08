@@ -4,6 +4,7 @@ from flask_app import app
 from routes.hello import hello_bp
 from routes.recommend.sync_user import sync_user_bp
 from routes.recommend.recommender import recommend_bp
+from routes.db.search import search_by_tags_bp
 
 # DB-related routes
 import routes.db.game
@@ -43,6 +44,7 @@ ensure_user_table()
 app.register_blueprint(hello_bp)
 app.register_blueprint(sync_user_bp)
 app.register_blueprint(recommend_bp)
+app.register_blueprint(search_by_tags_bp)
 
 
 # ---------------------------
