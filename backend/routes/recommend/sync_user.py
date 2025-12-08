@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from SteamWebAPI import instance as steamapi
 import Db
 import sqlite3
+from .steamid_utils import extract_steamid
 
 sync_user_bp = Blueprint("sync_user", __name__)
 
@@ -19,13 +20,18 @@ def ensure_user_table():
         """)
         conn.commit()
 
+
 @sync_user_bp.route("/sync_user", methods=["POST"])
 def sync_user():
     data = request.get_json(force=True)
-    steamid = data.get("steamid")
+    raw_id = data.get("steamid")
 
-    if not steamid:
+    if not raw_id:
         return jsonify({"error": "Missing steamid"}), 400
+
+    steamid = extract_steamid(raw_id)
+    if not steamid:
+        return jsonify({"error": "Could not resolve SteamID"}), 400
 
     ensure_user_table()
 
@@ -33,9 +39,8 @@ def sync_user():
     if not owned:
         return jsonify({"error": "Failed to fetch user library"}), 500
 
-    games = owned["games"]  # dict: {appid: playtime}
+    games = owned["games"]
 
-    # Store user-owned games
     with sqlite3.connect(DB_FILE) as conn:
         cur = conn.cursor()
         for appid, playtime in games.items():
@@ -45,23 +50,17 @@ def sync_user():
             """, (steamid, appid, playtime))
         conn.commit()
 
-    # Build list of owned games with names
     owned_list = []
     for appid in games.keys():
         details = Db.instance.get_app_details(appid)
-        if details is None:
-            owned_list.append({
-                "appid": appid,
-                "name": "(Unknown Title)"
-            })
-        else:
-            owned_list.append({
-                "appid": appid,
-                "name": details["name"]
-            })
+        owned_list.append({
+            "appid": appid,
+            "name": details["name"] if details else "(Unknown Title)"
+        })
 
     return jsonify({
         "message": "User library synchronized",
+        "steamid": steamid,
         "total_games": len(games),
         "owned_games": owned_list
     })
